@@ -7,18 +7,36 @@ router.get('/', async (req, res) => {
   // find all categories
   // be sure to include its associated Products
   try {
-    const categoryData = await Category.findAll({
-      include: [{ model: Category, through: Product, as: 'category_id' }]
+    await Category.findAll({
+      include: [{ 
+        model: Product,
+        attributes: ["id", "product_name", "price", "stock", "category_id"]
+      }]
+    })
+    .then((categoryData) => {
+      res.status(200).json(categoryData);
     });
-    res.status(200).json(categoryData);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
+  try {
+    await Category.findByPk(req.params.id, {
+      attributes: ["id", "category_name"],
+      include: [{
+        model: Product,
+        attributes: ["id", "product_name", "price", "stock", "category_id"],
+      }],
+    }).then((categoryData) => {
+      res.status(200).json(categoryData);
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 router.post('/', (req, res) => {
