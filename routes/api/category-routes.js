@@ -54,13 +54,22 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
 try {
+  
   await Category.update(req.body, {
     where: {
-      id: req.params.id,
+      id: req.params.id
     },
   })
-  .then(categoryUpdate => Category.findByPk(req.params.id))
-  .then((categoryUpdate) => res.status(200).json(categoryUpdate));
+  .then(async categoryPut => {
+    
+    if (req.body.id) {
+      const catergoryUpdated = await Category.findByPk(req.body.id);
+      res.status(200).json(catergoryUpdated);
+    } else {
+      const categoryUpdate = await Category.findByPk(req.params.id);
+      res.status(200).json(categoryUpdate);
+    }
+  });
 } catch (err) {
   res.status(500).json(err);
 }

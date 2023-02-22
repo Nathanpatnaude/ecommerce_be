@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     .then((tagAll) => {
       res.status(200).json(tagAll);
     });
-  } catch {
+  } catch (err) {
     res.status(500).json(err);
   }
 });
@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
     .then((tagOne) => {
       res.status(200).json(tagOne);
     })
-  } catch {
+  } catch (err)  {
     res.status(500).json(err);
   }
 });
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
     .then((tagNew) => {
       res.status(200).json(tagNew);
     });
-  } catch {
+  } catch (err)  {
     res.status(500).json(err);
   }  
 });
@@ -60,14 +60,23 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
   try {
+    
     await Tag.update(req.body, {
       where: {
         id: req.params.id
       },
     })
-    .then(tagUpdate => Tag.findByPk(req.params.id))
-    .then((tagUpdate) => res.status(200).json(tagUpdate));
-  } catch {
+    .then(async tagPut => {
+      
+      if (req.body.id) {
+        const tagUpdated = await Tag.findByPk(req.body.id);
+        res.status(200).json(tagUpdated);
+      } else {
+        const tagUpdate = await Tag.findByPk(req.params.id);
+        res.status(200).json(tagUpdate);
+      }
+    });
+  } catch (err)  {
     res.status(500).json(err);
   }
 });
@@ -75,16 +84,17 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
   try {
-    const tagDestroy = Tag.findByPk(req.params.id);
+    const tagDestroy = await Tag.findByPk(req.params.id);
+    console.log(tagDestroy);
     await Tag.destroy({
       where: {
         id: req.params.id,
       },
     })
     .then(() => {
-      res.status(200).json(`${tagDestroy} was removed from the database`);
+      res.status(200).json(`${tagDestroy.dataValues.tag_name} was removed from the database`);
     })
-  } catch {
+  } catch (err)  {
     res.status(500).json(err);
   }
 });
