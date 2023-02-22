@@ -46,6 +46,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  // create a new tag
   try {
     await Tag.create(req.body)
     .then((tagNew) => {
@@ -53,21 +54,36 @@ router.post('/', async (req, res) => {
     });
   } catch {
     res.status(500).json(err);
-  }
-  // create a new tag
+  }  
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
   try {
+    await Tag.update(req.body, {
+      where: {
+        id: req.params.id
+      },
+    })
+    .then(tagUpdate => Tag.findByPk(req.params.id))
+    .then((tagUpdate) => res.status(200).json(tagUpdate));
   } catch {
     res.status(500).json(err);
   }
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
   try {
+    const tagDestroy = Tag.findByPk(req.params.id);
+    await Tag.destroy({
+      where: {
+        id: req.params.id,
+      },
+    })
+    .then(() => {
+      res.status(200).json(`${tagDestroy} was removed from the database`);
+    })
   } catch {
     res.status(500).json(err);
   }
