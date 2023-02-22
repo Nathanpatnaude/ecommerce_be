@@ -39,16 +39,47 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // create a new category
+  try {
+    await Category.create(req.body)
+    .then((categoryNew) => {
+      res.status(200).json(categoryNew)
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a category by its `id` value
+try {
+  await Category.update(req.body, {
+    where: {
+      id: req.params.id,
+    },
+  })
+  .then(categoryUpdate => Category.findByPk(req.params.id))
+  .then((categoryUpdate) => res.status(200).json(categoryUpdate));
+} catch (err) {
+  res.status(500).json(err);
+}
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
+  try {
+    await Category.destroy({
+      where: {
+        id: req.params.id,
+      },
+    })
+    .then((categoryRemoved) => {
+      res.status(200).json(`The category was removed from the database`);
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
