@@ -69,13 +69,14 @@ try {
 router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
   try {
+    const categoryDestroy = Category.findByPk(req.params.id);
     await Category.destroy({
       where: {
         id: req.params.id,
       },
     })
-    .then((categoryRemoved) => {
-      res.status(200).json(`The category was removed from the database`);
+    .then(() => {
+      res.status(200).json(`${categoryDestroy} was removed from the database`);
     });
   } catch (err) {
     res.status(500).json(err);
