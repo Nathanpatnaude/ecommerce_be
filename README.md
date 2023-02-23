@@ -14,6 +14,8 @@
   
 A node.js backend application that allows the user to access and change a MYSQL database for Products, Catergories, Tags, and Product Tags. The application contains no front end but provides the models for the tables, routes to perform full CRUD operations to the database, and seeds for the user's stock.
 
+The application includes safeguards to update the Id if the Id is not being used. Every update and create operation also returns the full .json of the row item.
+
 This application uses ecommerce_db.
 
 </br>![Employee_tracker ui](./assets/ecommerce.png)</br>![SQL DATABASE STRUCTURE](./assets/sql-structure.png)</br></br></br>[CLICK HERE -- The file showing full functionality of the application](https://youtu.be/oLNy2bzSvqQ)  
