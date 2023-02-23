@@ -8,14 +8,14 @@ router.get('/', async (req, res) => {
   // be sure to include its associated Products
   try {
     await Category.findAll({
-      include: [{ 
+      include: [{
         model: Product,
         attributes: ["id", "product_name", "price", "stock", "category_id"]
       }]
     })
-    .then((categoryData) => {
-      res.status(200).json(categoryData);
-    });
+      .then((categoryData) => {
+        res.status(200).json(categoryData);
+      });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -43,9 +43,9 @@ router.post('/', async (req, res) => {
   // create a new category
   try {
     await Category.create(req.body)
-    .then((categoryNew) => {
-      res.status(200).json(categoryNew)
-    });
+      .then((categoryNew) => {
+        res.status(200).json(categoryNew)
+      });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -53,26 +53,31 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
-try {
-  
-  await Category.update(req.body, {
-    where: {
-      id: req.params.id
-    },
-  })
-  .then(async categoryPut => {
-    
-    if (req.body.id) {
-      const catergoryUpdated = await Category.findByPk(req.body.id);
-      res.status(200).json(catergoryUpdated);
+  try {
+    const categoryIdExists = await Category.findByPk(req.body.id);
+    if (categoryIdExists === null || req.body.id === req.params.id) {
+      await Category.update(req.body, {
+        where: {
+          id: req.params.id
+        },
+      })
+        .then(async (updated) => {
+          if (req.body.id && [...updated] != 0) {
+            const catergoryUpdated = await Category.findByPk(req.body.id);
+            res.status(200).json(catergoryUpdated);
+          } else if ([...updated] != 0) {
+            const categoryUpdate = await Category.findByPk(req.params.id);
+            res.status(200).json(categoryUpdate);
+          } else {
+            res.status(500).json('Category Id does not exist');
+          }
+        });
     } else {
-      const categoryUpdate = await Category.findByPk(req.params.id);
-      res.status(200).json(categoryUpdate);
+      res.status(500).json('Category Id already exists')
     }
-  });
-} catch (err) {
-  res.status(500).json(err);
-}
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 router.delete('/:id', async (req, res) => {
@@ -84,9 +89,9 @@ router.delete('/:id', async (req, res) => {
         id: req.params.id,
       },
     })
-    .then(() => {
-      res.status(200).json(`${categoryDestroy} was removed from the database`);
-    });
+      .then(() => {
+        res.status(200).json(`${categoryDestroy} was removed from the database`);
+      });
   } catch (err) {
     res.status(500).json(err);
   }
