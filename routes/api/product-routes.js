@@ -95,7 +95,7 @@ router.put('/:id', async (req, res) => {
   // update product data
   const productNewIdExists = await Product.findByPk(req.body.id);
   const productIdExists = await Product.findByPk(req.params.id);
-  console.log(req.body.id, "===", req.params.id);
+  // Can update Id if the body.id === null or if the body.id is the same as the product Id
   if (productNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
     Product.update(req.body, {
       where: {
@@ -130,9 +130,8 @@ router.put('/:id', async (req, res) => {
         ]);
       })
       .then(async (updated) => {
-        
+        // returns the updated json even if the id changes
         if (req.body.id) {
-          console.log(...updated);
           const productUpdated = await Product.findByPk(req.body.id, {
             include: [
               {

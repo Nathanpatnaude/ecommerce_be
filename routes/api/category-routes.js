@@ -56,7 +56,7 @@ router.put('/:id', async (req, res) => {
   try {
     const categoryNewIdExists = await Category.findByPk(req.body.id);
     const categoryIdExists = await Category.findByPk(req.params.id);
-    console.log(req.body.id, "===", req.params.id);
+    // Can update Id if the body.id === null or if the body.id is the same as the category Id
     if (categoryNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
       await Category.update(req.body, {
         where: {
@@ -64,7 +64,7 @@ router.put('/:id', async (req, res) => {
         },
       })
         .then(async (updated) => {
-          console.log(updated);
+           // returns the updated json even if the id changes
           if (req.body.id) {
             const catergoryUpdated = await Category.findByPk(req.body.id);
             res.status(200).json(catergoryUpdated);

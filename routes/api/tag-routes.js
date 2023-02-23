@@ -62,6 +62,7 @@ router.put('/:id', async (req, res) => {
   try {
     const tagNewIdExists = await Tag.findByPk(req.body.id);
     const tagIdExists = await Tag.findByPk(req.params.id);
+    // Can update Id if the body.id === null or if the body.id is the same as the tag Id
     if (tagNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
       await Tag.update(req.body, {
         where: {
@@ -69,6 +70,7 @@ router.put('/:id', async (req, res) => {
         },
       })
         .then(async (updated) => {
+           // returns the updated json even if the id changes
           if (req.body.id) {
             const tagUpdated = await Tag.findByPk(req.body.id);
             res.status(200).json(tagUpdated);
