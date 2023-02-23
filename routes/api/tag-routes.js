@@ -60,25 +60,25 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
   try {
-    const tagIdExists = await Tag.findByPk(req.body.id);
-    console.log(tagIdExists);
-    if (tagIdExists === null || req.body.id === req.params.id) {
+    const tagNewIdExists = await Tag.findByPk(req.body.id);
+    const tagIdExists = await Tag.findByPk(req.params.id);
+    if (tagNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
       await Tag.update(req.body, {
         where: {
           id: req.params.id
         },
       })
         .then(async (updated) => {
-          if (req.body.id && [...updated] != 0) {
+          if (req.body.id) {
             const tagUpdated = await Tag.findByPk(req.body.id);
             res.status(200).json(tagUpdated);
-          } else if ([...updated] != 0) {
+          } else {
             const tagUpdate = await Tag.findByPk(req.params.id);
             res.status(200).json(tagUpdate);
-          } else {
-            res.status(500).json('Tag Id does not exist');
           }
         });
+    } else if (tagIdExists === null) {
+      res.status(500).json('Tag Id does not exist');
     } else {
       res.status(500).json('Tag Id already exists')
     }

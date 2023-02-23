@@ -54,24 +54,27 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
   try {
-    const categoryIdExists = await Category.findByPk(req.body.id);
-    if (categoryIdExists === null || req.body.id === req.params.id) {
+    const categoryNewIdExists = await Category.findByPk(req.body.id);
+    const categoryIdExists = await Category.findByPk(req.params.id);
+    console.log(req.body.id, "===", req.params.id);
+    if (categoryNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
       await Category.update(req.body, {
         where: {
           id: req.params.id
         },
       })
         .then(async (updated) => {
-          if (req.body.id && [...updated] != 0) {
+          console.log(updated);
+          if (req.body.id) {
             const catergoryUpdated = await Category.findByPk(req.body.id);
             res.status(200).json(catergoryUpdated);
-          } else if ([...updated] != 0) {
+          } else {
             const categoryUpdate = await Category.findByPk(req.params.id);
             res.status(200).json(categoryUpdate);
-          } else {
-            res.status(500).json('Category Id does not exist');
           }
         });
+    } else if (categoryIdExists === null) {
+      res.status(500).json('Category Id does not exist');
     } else {
       res.status(500).json('Category Id already exists')
     }
@@ -90,7 +93,7 @@ router.delete('/:id', async (req, res) => {
       },
     })
       .then(() => {
-        res.status(200).json(`${categoryDestroy.dataValues.tag_name} was removed from the database`);
+        res.status(200).json(`${categoryDestroy.dataValues.category_name} was removed from the database`);
       });
   } catch (err) {
     res.status(500).json(err);

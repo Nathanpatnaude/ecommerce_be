@@ -50,9 +50,9 @@ router.get('/:id', async (req, res) => {
         },
       ],
     })
-    .then((productOne) => {
-      res.status(200).json(productOne);
-    })
+      .then((productOne) => {
+        res.status(200).json(productOne);
+      })
   } catch (err) {
     res.status(500).json(err);
   }
@@ -91,60 +91,89 @@ router.post('/', (req, res) => {
 });
 
 // update product
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update product data
-  Product.update(req.body, {
-    where: {
-      id: req.params.id,
-    },
-  })
-    .then((product) => {
-      // find all associated tags from ProductTag
-      return ProductTag.findAll({ where: { product_id: req.params.id } });
+  const productNewIdExists = await Product.findByPk(req.body.id);
+  const productIdExists = await Product.findByPk(req.params.id);
+  console.log(req.body.id, "===", req.params.id);
+  if (productNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
+    Product.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
     })
-    .then((productTags) => {
-      // get list of current tag_ids
-      const productTagIds = productTags.map(({ tag_id }) => tag_id);
-      // create filtered list of new tag_ids
-      const newProductTags = req.body.tagIds
-        .filter((tag_id) => !productTagIds.includes(tag_id))
-        .map((tag_id) => {
-          return {
-            product_id: req.params.id,
-            tag_id,
-          };
-        });
-      // figure out which ones to remove
-      const productTagsToRemove = productTags
-        .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
-        .map(({ id }) => id);
+      .then((product) => {
+        // find all associated tags from ProductTag
+        return ProductTag.findAll({ where: { product_id: req.params.id } });
+      })
+      .then((productTags) => {
+        // get list of current tag_ids
+        const productTagIds = productTags.map(({ tag_id }) => tag_id);
+        // create filtered list of new tag_ids
+        const newProductTags = req.body.tagIds
+          .filter((tag_id) => !productTagIds.includes(tag_id))
+          .map((tag_id) => {
+            return {
+              product_id: req.params.id,
+              tag_id,
+            };
+          });
+        // figure out which ones to remove
+        const productTagsToRemove = productTags
+          .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
+          .map(({ id }) => id);
 
-      // run both actions
-      return Promise.all([
-        ProductTag.destroy({ where: { id: productTagsToRemove } }),
-        ProductTag.bulkCreate(newProductTags),
-      ]);
-    })
-    .then(async (updatedProductTags) => {
-      const productUpdated = await Product.findByPk(req.params.id, {
-        include: [
-          {
-            model: Tag,
-            attributes: ["id", "tag_name"],
-            through: "ProductTag",
-          },
-          {
-            model: Category,
-            attributes: ["id", "category_name"],
-          },
-        ],
+        // run both actions
+        return Promise.all([
+          ProductTag.destroy({ where: { id: productTagsToRemove } }),
+          ProductTag.bulkCreate(newProductTags),
+        ]);
+      })
+      .then(async (updated) => {
+        
+        if (req.body.id) {
+          console.log(...updated);
+          const productUpdated = await Product.findByPk(req.body.id, {
+            include: [
+              {
+                model: Tag,
+                attributes: ["id", "tag_name"],
+                through: "ProductTag",
+              },
+              {
+                model: Category,
+                attributes: ["id", "category_name"],
+              },
+            ],
+          });
+          res.json(productUpdated)
+        } else {
+          const productUpdated = await Product.findByPk(req.params.id, {
+            include: [
+              {
+                model: Tag,
+                attributes: ["id", "tag_name"],
+                through: "ProductTag",
+              },
+              {
+                model: Category,
+                attributes: ["id", "category_name"],
+              },
+            ],
+          });
+          res.json(productUpdated)
+
+        }
+      })
+      .catch((err) => {
+        // console.log(err);
+        res.status(400).json(err);
       });
-      res.json(productUpdated)
-    })
-    .catch((err) => {
-      // console.log(err);
-      res.status(400).json(err);
-    });
+  } else if (productIdExists === null) {
+    res.status(500).json('Product Id does not exist');
+  } else {
+    res.status(500).json('Product Id already exists')
+  }
 });
 
 router.delete('/:id', async (req, res) => {
@@ -156,9 +185,9 @@ router.delete('/:id', async (req, res) => {
         id: req.params.id,
       },
     })
-    .then(() => {
-      res.status(200).json(`${productDestroy.dataValues.tag_name} was removed from the database`);
-    });
+      .then(() => {
+        res.status(200).json(`${productDestroy.dataValues.product_name} was removed from the database`);
+      });
   } catch (err) {
     res.status(500).json(err);
   }
