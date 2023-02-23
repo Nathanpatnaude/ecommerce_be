@@ -90,7 +90,7 @@ router.delete('/:id', async (req, res) => {
       },
     })
       .then(() => {
-        res.status(200).json(`${categoryDestroy} was removed from the database`);
+        res.status(200).json(`${categoryDestroy.dataValues.tag_name} was removed from the database`);
       });
   } catch (err) {
     res.status(500).json(err);
