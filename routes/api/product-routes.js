@@ -93,10 +93,20 @@ router.post('/', (req, res) => {
 // update product
 router.put('/:id', async (req, res) => {
   // update product data
+
+  // create an id to access row after update if updating id
+  var newIdTarget
+  if (req.body.id) {
+    newIdTarget = parseInt(req.body.id);
+  } else {
+    newIdTarget = parseInt(req.params.id);
+  }
   const productNewIdExists = await Product.findByPk(req.body.id);
   const productIdExists = await Product.findByPk(req.params.id);
   // Can update Id if the body.id === null or if the body.id is the same as the product Id
   if (productNewIdExists === null || parseInt(req.body.id) === parseInt(req.params.id)) {
+
+
     Product.update(req.body, {
       where: {
         id: req.params.id,
@@ -104,7 +114,7 @@ router.put('/:id', async (req, res) => {
     })
       .then((product) => {
         // find all associated tags from ProductTag
-        return ProductTag.findAll({ where: { product_id: req.params.id } });
+        return ProductTag.findAll({ where: { product_id: newIdTarget } });
       })
       .then((productTags) => {
         // get list of current tag_ids
@@ -114,7 +124,7 @@ router.put('/:id', async (req, res) => {
           .filter((tag_id) => !productTagIds.includes(tag_id))
           .map((tag_id) => {
             return {
-              product_id: req.params.id,
+              product_id: newIdTarget,
               tag_id,
             };
           });
@@ -131,8 +141,7 @@ router.put('/:id', async (req, res) => {
       })
       .then(async (updated) => {
         // returns the updated json even if the id changes
-        if (req.body.id) {
-          const productUpdated = await Product.findByPk(req.body.id, {
+          const productUpdated = await Product.findByPk(newIdTarget, {
             include: [
               {
                 model: Tag,
@@ -146,23 +155,6 @@ router.put('/:id', async (req, res) => {
             ],
           });
           res.json(productUpdated)
-        } else {
-          const productUpdated = await Product.findByPk(req.params.id, {
-            include: [
-              {
-                model: Tag,
-                attributes: ["id", "tag_name"],
-                through: "ProductTag",
-              },
-              {
-                model: Category,
-                attributes: ["id", "category_name"],
-              },
-            ],
-          });
-          res.json(productUpdated)
-
-        }
       })
       .catch((err) => {
         // console.log(err);
