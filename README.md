@@ -18,7 +18,7 @@ The application includes safeguards to update the Id if the Id is not being used
 
 This application uses ecommerce_db.
 
-</br>![Employee_tracker ui](./assets/ecommerce.png)</br>![SQL DATABASE STRUCTURE](./assets/sql-structure.png)</br></br></br>[CLICK HERE -- The file showing full functionality of the application](https://youtu.be/oLNy2bzSvqQ)  
+</br>![Ecomerce](./assets/ecommerce.png)</br>![SQL DATABASE STRUCTURE](./assets/sql-structure.png)</br></br></br>[CLICK HERE -- The file showing full functionality of the application](https://youtu.be/zWZxKPw0aVg)  
   
 
 
